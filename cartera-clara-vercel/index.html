@@ -619,7 +619,7 @@
     .history-panel {
       min-height: 0;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
       gap: 10px;
     }
 
@@ -643,6 +643,71 @@
       margin-top: 4px;
     }
 
+    .trend-panel {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(280px, 0.9fr);
+      gap: 10px;
+    }
+
+    .chart-box,
+    .changes-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft-2);
+      padding: 12px;
+      min-height: 180px;
+      overflow: hidden;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sparkline {
+      width: 100%;
+      height: 124px;
+      display: block;
+    }
+
+    .sparkline path.line {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sparkline path.area {
+      fill: rgba(22, 115, 95, 0.12);
+    }
+
+    .sparkline circle {
+      fill: var(--green);
+      stroke: var(--panel);
+      stroke-width: 2;
+    }
+
+    .mini-table {
+      max-height: 126px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
     .hidden {
       display: none !important;
     }
@@ -664,6 +729,7 @@
       }
 
       .workspace,
+      .trend-panel,
       .hero-product {
         grid-template-columns: 1fr;
       }
@@ -891,12 +957,38 @@
           <div class="history-card">
             <div class="label">Variacion vs anterior</div>
             <strong id="variationValue">--</strong>
-            <div class="detail">Segun patrimonio estimado en ARS.</div>
+            <div class="detail" id="variationDetail">Segun patrimonio estimado en ARS.</div>
           </div>
           <div class="history-card">
-            <div class="label">Mejor proximo dato</div>
-            <strong>Precio promedio</strong>
-            <div class="detail">Necesario para medir rendimiento real.</div>
+            <div class="label">Movimientos detectados</div>
+            <strong id="movementValue">--</strong>
+            <div class="detail" id="movementDetail">Se calculan desde la proxima importacion.</div>
+          </div>
+        </div>
+      </div>
+      <div class="trend-panel">
+        <div class="chart-box">
+          <div class="chart-head">
+            <strong>Evolucion del patrimonio</strong>
+            <span id="trendSummary">Sin historial suficiente</span>
+          </div>
+          <svg class="sparkline" id="trendChart" viewBox="0 0 640 150" role="img" aria-label="Grafico de evolucion del patrimonio"></svg>
+        </div>
+        <div class="changes-box">
+          <div class="chart-head">
+            <strong>Cambios por instrumento</strong>
+            <span id="moversSummary">Ultima vs anterior</span>
+          </div>
+          <div class="mini-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Instrumento</th>
+                  <th class="num">Cambio</th>
+                </tr>
+              </thead>
+              <tbody id="changeRows"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1206,17 +1298,115 @@
       localStorage.setItem(historyKey, JSON.stringify(items.slice(0, 30)));
     }
 
+    function instrumentKey(row) {
+      return row.ticker || row.instrumento || row.name;
+    }
+
+    function snapshotPositions(rows) {
+      return rows.map((row) => ({
+        key: instrumentKey(row),
+        name: row.name || row.instrumento,
+        ticker: row.ticker,
+        type: row.type,
+        valueArs: row.valueArs,
+        weight: row.weight
+      }));
+    }
+
     function addHistoryEntry(rows, total) {
       const entry = {
         importedAt: state.importedAt,
         source: state.source,
         total,
         positions: rows.length,
-        mep: state.mep
+        mep: state.mep,
+        positionsSnapshot: snapshotPositions(rows)
       };
       const history = readHistory().filter((item) => item.importedAt !== entry.importedAt);
       history.unshift(entry);
       writeHistory(history);
+    }
+
+    function renderTrend(history) {
+      const svg = $("trendChart");
+      if (history.length < 2) {
+        $("trendSummary").textContent = "Carga al menos 2 CSV";
+        svg.innerHTML = `<text x="320" y="78" text-anchor="middle" fill="#66736d" font-size="15">Sin historial suficiente</text>`;
+        return;
+      }
+
+      const ordered = history.slice().reverse();
+      const values = ordered.map((item) => item.total);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const span = max - min || 1;
+      const width = 640;
+      const height = 150;
+      const pad = 18;
+      const points = values.map((value, index) => {
+        const x = pad + (index * (width - pad * 2)) / Math.max(values.length - 1, 1);
+        const y = height - pad - ((value - min) / span) * (height - pad * 2);
+        return [x, y];
+      });
+      const line = points.map(([x, y], index) => `${index ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+      const area = `${line} L ${points[points.length - 1][0].toFixed(1)} ${height - pad} L ${points[0][0].toFixed(1)} ${height - pad} Z`;
+      const first = values[0];
+      const last = values[values.length - 1];
+      const diff = last - first;
+      $("trendSummary").textContent = `${diff >= 0 ? "+" : ""}${money.format(diff)} desde la primera carga`;
+      svg.innerHTML = `
+        <path class="area" d="${area}"></path>
+        <path class="line" d="${line}"></path>
+        ${points.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4"></circle>`).join("")}
+      `;
+    }
+
+    function compareSnapshots(latest, previous) {
+      const current = new Map((latest.positionsSnapshot || []).map((item) => [item.key, item]));
+      const prior = new Map((previous.positionsSnapshot || []).map((item) => [item.key, item]));
+      const keys = new Set([...current.keys(), ...prior.keys()]);
+      return [...keys].map((key) => {
+        const now = current.get(key);
+        const before = prior.get(key);
+        return {
+          key,
+          name: now?.name || before?.name || key,
+          ticker: now?.ticker || before?.ticker || "",
+          current: now?.valueArs || 0,
+          previous: before?.valueArs || 0,
+          delta: (now?.valueArs || 0) - (before?.valueArs || 0),
+          status: !before ? "Nueva" : !now ? "Salio" : "Cambio"
+        };
+      }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+    }
+
+    function renderInstrumentChanges(history) {
+      if (history.length < 2 || !history[0].positionsSnapshot || !history[1].positionsSnapshot) {
+        $("movementValue").textContent = "--";
+        $("movementDetail").textContent = "Se activa con dos importaciones nuevas.";
+        $("moversSummary").textContent = "Carga otro CSV";
+        $("changeRows").innerHTML = `<tr><td colspan="2"><div class="empty">Necesitamos dos importaciones con snapshot para comparar.</div></td></tr>`;
+        return;
+      }
+
+      const changes = compareSnapshots(history[0], history[1]);
+      const meaningful = changes.filter((item) => Math.abs(item.delta) > 1);
+      const newCount = meaningful.filter((item) => item.status === "Nueva").length;
+      const outCount = meaningful.filter((item) => item.status === "Salio").length;
+      $("movementValue").textContent = meaningful.length;
+      $("movementDetail").textContent = `${newCount} nuevas, ${outCount} salidas, ${Math.max(meaningful.length - newCount - outCount, 0)} modificadas.`;
+      $("moversSummary").textContent = `${meaningful.length} cambios detectados`;
+      $("changeRows").innerHTML = meaningful.slice(0, 8).map((item) => `
+        <tr>
+          <td>
+            <div class="asset">
+              <strong title="${item.name}">${item.ticker || item.name}</strong>
+              <span class="ticker">${item.status}</span>
+            </div>
+          </td>
+          <td class="num ${item.delta >= 0 ? "positive" : "negative"}">${item.delta >= 0 ? "+" : ""}${money.format(item.delta)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="2"><div class="empty">No hubo cambios relevantes.</div></td></tr>`;
     }
 
     function renderHistory(rows, total) {
@@ -1226,6 +1416,9 @@
         $("lastImportValue").textContent = "Sin datos";
         $("lastImportDetail").textContent = "Carga un CSV desde Importacion.";
         $("variationValue").textContent = "--";
+        $("variationDetail").textContent = "Segun patrimonio estimado en ARS.";
+        renderTrend(history);
+        renderInstrumentChanges(history);
         $("historyRows").innerHTML = `<tr><td colspan="5"><div class="empty">Todavia no hay importaciones guardadas.</div></td></tr>`;
         return;
       }
@@ -1233,9 +1426,14 @@
       const latest = history[0];
       const previous = history[1];
       const variation = previous ? latest.total - previous.total : null;
+      const variationPct = previous && previous.total ? variation / previous.total : null;
       $("lastImportValue").textContent = money.format(latest.total);
       $("lastImportDetail").textContent = `${latest.source} - ${formatImportedAt(latest.importedAt)}`;
       $("variationValue").textContent = variation === null ? "--" : `${variation >= 0 ? "+" : ""}${money.format(variation)}`;
+      $("variationValue").className = variation === null ? "" : variation >= 0 ? "positive" : "negative";
+      $("variationDetail").textContent = variationPct === null ? "Hace falta una carga anterior." : `${variationPct >= 0 ? "+" : ""}${number.format(variationPct * 100)}% vs carga anterior.`;
+      renderTrend(history);
+      renderInstrumentChanges(history);
       $("historyRows").innerHTML = history.map((item) => `
         <tr>
           <td>${formatImportedAt(item.importedAt).replace("Importado ", "")}</td>
@@ -1363,6 +1561,7 @@
       state.type = "todos";
       $("searchInput").value = "";
       localStorage.removeItem(storageKey);
+      localStorage.removeItem(historyKey);
       render();
     });
 

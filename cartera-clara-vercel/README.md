@@ -10,6 +10,8 @@ Tablero web para cargar una exportacion CSV de Cocos Capital y analizar la compo
 - Importacion diaria de CSV.
 - Historial local de importaciones.
 - Comparacion simple contra la carga anterior.
+- Grafico de evolucion del patrimonio.
+- Deteccion de cambios por instrumento entre la ultima carga y la anterior.
 
 ## Uso diario
 
@@ -21,6 +23,7 @@ Tablero web para cargar una exportacion CSV de Cocos Capital y analizar la compo
 6. Entrar a `Historial` para comparar contra cargas anteriores.
 
 La ultima importacion queda guardada localmente en el navegador de ese dispositivo.
+Las comparaciones por instrumento se calculan a partir de importaciones realizadas con esta version o posteriores.
 
 ## Publicar en Vercel
 
