@@ -1,0 +1,1375 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cartera Clara</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f5f2;
+      --panel: #ffffff;
+      --ink: #151d1a;
+      --muted: #66736d;
+      --line: #dce4df;
+      --soft: #eef3ef;
+      --soft-2: #f8faf8;
+      --green: #16735f;
+      --teal: #277a8a;
+      --gold: #a87908;
+      --red: #b14f4b;
+      --blue: #385f9f;
+      --violet: #6a5b9c;
+      --shadow: 0 12px 28px rgba(24, 36, 30, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.35;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .app {
+      height: 100vh;
+      padding: 16px clamp(14px, 2.4vw, 30px);
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: 14px;
+      align-items: start;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 2.6vw, 34px);
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .control,
+    .file-control,
+    .segmented {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(24, 36, 30, 0.03);
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: auto 92px;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .control input {
+      width: 92px;
+      border: 0;
+      outline: 0;
+      text-align: right;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .file-control {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 12px;
+      color: #ffffff;
+      background: var(--green);
+      border-color: var(--green);
+      font-size: 13px;
+      font-weight: 750;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .file-control input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .segmented {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .segmented button {
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 11px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .segmented button.active {
+      color: var(--ink);
+      background: var(--soft);
+    }
+
+    .product-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .nav-button.active {
+      background: var(--green);
+      border-color: var(--green);
+      color: #ffffff;
+    }
+
+    .hero-product {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(260px, 0.62fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .hero-steps {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .hero-copy {
+      display: grid;
+      align-content: center;
+      gap: 10px;
+      min-height: 180px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero-copy h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.03;
+      max-width: 760px;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .primary-button {
+      min-height: 38px;
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      background: var(--green);
+      color: #ffffff;
+      padding: 0 13px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .hero-steps {
+      display: grid;
+      gap: 10px;
+      align-content: center;
+    }
+
+    .step-line {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 9px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .step-line strong {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--soft);
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: 1.35fr repeat(4, minmax(126px, 0.75fr));
+      gap: 10px;
+    }
+
+    .card,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      min-height: 86px;
+      padding: 12px 14px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .card.primary {
+      border-color: #c4d9d1;
+      background: #fbfdfc;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      font-size: clamp(20px, 2.35vw, 31px);
+      line-height: 1.05;
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .detail {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(300px, 0.78fr) minmax(470px, 1.28fr) minmax(300px, 0.82fr);
+      gap: 12px;
+    }
+
+    .column {
+      min-height: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .column.left { grid-template-rows: 272px minmax(0, 1fr); }
+    .column.right { grid-template-rows: 218px 174px minmax(0, 1fr); }
+
+    .panel {
+      min-height: 0;
+      padding: 13px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 11px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .micro {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .donut-grid {
+      display: grid;
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .donut {
+      width: 132px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--donut, conic-gradient(var(--green) 0 100%));
+      position: relative;
+    }
+
+    .donut::after {
+      content: attr(data-main);
+      position: absolute;
+      inset: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--panel);
+      font-size: 24px;
+      font-weight: 850;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .insights,
+    .todo-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .import-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .import-zone {
+      border: 1px dashed #b8ccc3;
+      border-radius: 8px;
+      background: #f8fbf9;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .import-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .import-status {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .import-status strong {
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .import-status span,
+    .import-help {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .import-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .insight {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      padding: 9px;
+      background: var(--soft);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .pill {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .table-panel {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) 150px;
+      gap: 8px;
+    }
+
+    .filters input,
+    .filters select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft-2);
+      color: var(--ink);
+      padding: 0 10px;
+      outline: 0;
+    }
+
+    .table-wrap {
+      min-height: 0;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th,
+    td {
+      padding: 8px 9px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f9fbfa;
+      color: var(--muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    td.num,
+    th.num {
+      text-align: right;
+    }
+
+    .asset {
+      display: grid;
+      gap: 2px;
+    }
+
+    .asset strong {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+    }
+
+    .ticker {
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+
+    .type {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 72px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #eef5f2;
+      color: #206d5e;
+      font-size: 10.5px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #edf2ef;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+
+    .focus-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .focus-row {
+      display: grid;
+      gap: 5px;
+    }
+
+    .focus-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12.5px;
+    }
+
+    .focus-top span {
+      color: var(--muted);
+    }
+
+    .todo-item {
+      padding: 8px 0 8px 10px;
+      border-left: 3px solid var(--gold);
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .history-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .history-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft-2);
+      padding: 12px;
+    }
+
+    .history-card strong {
+      display: block;
+      font-size: 20px;
+      margin-top: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 1180px) {
+      .app {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .kpis {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .workspace,
+      .hero-product {
+        grid-template-columns: 1fr;
+      }
+
+      .column.left,
+      .column.right {
+        grid-template-rows: auto;
+      }
+
+      .table-wrap {
+        max-height: 520px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .kpis,
+      .filters,
+      .donut-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .donut {
+        width: 122px;
+      }
+
+      th:nth-child(2),
+      td:nth-child(2),
+      th:nth-child(5),
+      td:nth-child(5) {
+        display: none;
+      }
+
+      .asset strong {
+        max-width: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Cartera Clara</h1>
+        <p class="subtitle" id="subtitle">Tu portafolio argentino, explicado de verdad.</p>
+      </div>
+      <div class="actions">
+        <label class="control">
+          MEP ref.
+          <input id="mepInput" type="number" min="1" step="1" value="1300">
+        </label>
+        <div class="segmented" aria-label="Vista del tablero">
+          <button class="active" data-view="portfolio">Cartera</button>
+          <button data-view="risk">Riesgo</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="product-nav" aria-label="Navegacion principal">
+      <button class="nav-button active" data-page="home">Inicio</button>
+      <button class="nav-button" data-page="dashboard">Dashboard</button>
+      <button class="nav-button" data-page="history">Historial</button>
+    </nav>
+
+    <section class="hero-product" id="homePage">
+      <div class="hero-copy">
+        <div class="eyebrow">Cartera Clara</div>
+        <h2>Entende tu cartera sin pelearte con el export de tu broker.</h2>
+        <p>Importa tu CSV diario de Cocos, revisa composicion, liquidez, concentracion y guarda un historial local para comparar como evoluciona tu portafolio.</p>
+        <div class="hero-actions">
+          <button class="primary-button" data-jump="dashboard" type="button">Ver dashboard</button>
+          <button class="ghost-button" data-jump="history" type="button">Ver historial</button>
+        </div>
+      </div>
+      <div class="hero-steps">
+        <div class="step-line"><strong>1</strong><span>Exporta tu portafolio actualizado desde Cocos Capital.</span></div>
+        <div class="step-line"><strong>2</strong><span>Subi el CSV en la seccion Importacion del dashboard.</span></div>
+        <div class="step-line"><strong>3</strong><span>Revisa los cambios y compara contra importaciones anteriores.</span></div>
+      </div>
+    </section>
+
+    <section class="kpis hidden" id="kpiPage" aria-label="Indicadores principales">
+      <div class="card primary">
+        <div class="label">Patrimonio estimado</div>
+        <div class="value" id="totalValue">$0</div>
+        <div class="detail" id="totalDetail">Valuado en ARS con MEP editable</div>
+      </div>
+      <div class="card">
+        <div class="label">Posiciones</div>
+        <div class="value" id="positionsValue">0</div>
+        <div class="detail" id="positionsDetail">Instrumentos y saldos</div>
+      </div>
+      <div class="card">
+        <div class="label">CEDEARs</div>
+        <div class="value" id="cedearValue">0%</div>
+        <div class="detail">Exposicion dominante</div>
+      </div>
+      <div class="card">
+        <div class="label">Liquidez</div>
+        <div class="value" id="cashValue">$0</div>
+        <div class="detail" id="cashDetail">ARS + USD caja</div>
+      </div>
+      <div class="card">
+        <div class="label">Top 5</div>
+        <div class="value" id="topValue">0%</div>
+        <div class="detail">Concentracion principal</div>
+      </div>
+    </section>
+
+    <main class="workspace hidden" id="dashboardPage">
+      <div class="column left">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Composicion</h2>
+            <span class="micro">ARS equivalente</span>
+          </div>
+          <div class="donut-grid">
+            <div class="donut" id="donut" data-main="0%"></div>
+            <div class="legend" id="legend"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Lecturas accionables</h2>
+            <span class="micro" id="insightMode">cartera</span>
+          </div>
+          <div class="insights" id="insights"></div>
+        </section>
+      </div>
+
+      <section class="panel table-panel">
+        <div class="panel-head">
+          <h2>Posiciones</h2>
+          <span class="micro" id="tableCount">0 filas</span>
+        </div>
+        <div class="filters">
+          <input id="searchInput" type="search" placeholder="Buscar instrumento o ticker">
+          <select id="typeFilter" aria-label="Filtro por tipo">
+            <option value="todos">Todos los tipos</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="name">Instrumento</th>
+                <th data-sort="type">Tipo</th>
+                <th class="num" data-sort="valueArs">Valor ARS</th>
+                <th class="num" data-sort="weight">Peso</th>
+                <th>Visual</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="column right">
+        <section class="panel import-card">
+          <div class="panel-head">
+            <h2>Importacion</h2>
+            <span class="micro">carga diaria</span>
+          </div>
+          <div class="import-zone">
+            <div class="import-top">
+              <div class="import-status">
+                <strong id="importStatus">CSV demo cargado</strong>
+                <span id="importMeta">Subi tu exportacion diaria de Cocos.</span>
+              </div>
+            </div>
+            <div class="import-actions">
+              <label class="file-control">
+                Subir CSV
+                <input id="csvInput" type="file" accept=".csv,text/csv">
+              </label>
+              <button class="ghost-button" id="resetData" type="button">Restaurar demo</button>
+            </div>
+            <div class="import-help">El archivo se procesa en tu navegador y queda recordado en este dispositivo.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Focos</h2>
+            <span class="micro">seguimiento</span>
+          </div>
+          <div class="focus-list" id="focusList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Datos faltantes</h2>
+            <span class="micro">fase 2</span>
+          </div>
+          <div class="todo-list">
+            <div class="todo-item">Precio promedio y fecha de compra por instrumento.</div>
+            <div class="todo-item">Movimientos: aportes, retiros, dividendos, cupones y rescates.</div>
+            <div class="todo-item">Benchmarks: dolar MEP, inflacion, S&amp;P 500, Merval y objetivo propio.</div>
+            <div class="todo-item">Historial para medir rendimiento diario, mensual y acumulado.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <section class="panel history-panel hidden" id="historyPage">
+      <div>
+        <div class="panel-head">
+          <h2>Historial de importaciones</h2>
+          <span class="micro" id="historyCount">0 cargas</span>
+        </div>
+        <div class="history-grid">
+          <div class="history-card">
+            <div class="label">Ultima carga</div>
+            <strong id="lastImportValue">Sin datos</strong>
+            <div class="detail" id="lastImportDetail">Carga un CSV desde Importacion.</div>
+          </div>
+          <div class="history-card">
+            <div class="label">Variacion vs anterior</div>
+            <strong id="variationValue">--</strong>
+            <div class="detail">Segun patrimonio estimado en ARS.</div>
+          </div>
+          <div class="history-card">
+            <div class="label">Mejor proximo dato</div>
+            <strong>Precio promedio</strong>
+            <div class="detail">Necesario para medir rendimiento real.</div>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Archivo</th>
+              <th class="num">Patrimonio</th>
+              <th class="num">Posiciones</th>
+              <th class="num">MEP</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const defaultRows = [
+      ["Dolar estadounidense ()", "73,83", "0", "0", "0"],
+      ["ON CELULOSA ARG CL. 13 U$S V.04/06/25 CG (CRCEO)", "442", "3731", "ARS", "16491,02"],
+      ["CEDEAR VANGUARD FTSE DEVELOPED MARKETS ETF (VEA)", "8", "11450", "ARS", "91600"],
+      ["PAMPA ENERGIA S.A. ESCRIT.  1 VOTO (PAMP)", "25", "5135", "ARS", "128375"],
+      ["ON PAMPA ENER CLASE 22 VTO 04-10-28 U$S CG (MGCNO)", "123", "158880", "ARS", "195422,4"],
+      ["YPF SOCIEDAD ANON REGS 8.25% V 17/01/34 (YM34O)", "123", "171800", "ARS", "211314"],
+      ["BONO TESORO NACIONAL TASA DUAL CER/TAMAR 15/12/28 $ (TXMD8)", "250000", "90,6", "ARS", "226500"],
+      ["ON MSU CL. 13 VTO.17/07/26 U$S CG (MSSEO)", "156", "163880", "ARS", "255652,8"],
+      ["CEDEAR PFIZER INC. (PFE)", "31", "9690", "ARS", "300390"],
+      ["CEDEAR MICRON TECHNOLOGY INC (MU)", "1", "311950", "ARS", "311950"],
+      ["CEDEAR APPLE INC. (AAPL)", "14", "24180", "ARS", "338520"],
+      ["CEDEAR JOHNSON & JOHNSON (JNJ)", "19", "27420", "ARS", "520980"],
+      ["LETRA TESORO NACIONAL CAPITALIZABLE 31/07/26 $ (S31L6)", "452874", "116,09", "ARS", "525741,43"],
+      ["CEDEAR MERCADOLIBRE INC. (MELI)", "25", "23130", "ARS", "578250"],
+      ["CEDEAR ISHARES MSCI BRAZIL CAP (EWZ)", "21", "27540", "ARS", "578340"],
+      ["CEDEAR DE CHEVRON CORPORATION (CVX)", "35", "16970", "ARS", "593950"],
+      ["CEDEAR DE EXXON MOBIL CORPORATION (XOM)", "28", "21580", "ARS", "604240"],
+      ["CEDEAR COCA-COLA COMPANY (KO)", "28", "26600", "ARS", "744800"],
+      ["CEDEAR VISA INC (V)", "24", "31280", "ARS", "750720"],
+      ["BONO REP ARG AJ CER V30/06/27 $ CG (TZX27)", "199745", "380,45", "ARS", "759929,85"],
+      ["CEDEAR DE MICROSOFT CORP. (MSFT)", "38", "20790", "ARS", "790020"],
+      ["CEDEAR DE WAL-MART INC. (WMT)", "86", "10020", "ARS", "861720"],
+      ["CEDEAR TESLA, INC. (TSLA)", "25", "41760", "ARS", "1044000"],
+      ["CEDEAR AMAZON.COM, INC (AMZN)", "393", "2697,5", "ARS", "1060117,5"],
+      ["CEDEAR J P MORGAN CO INC (JPM)", "36", "35660", "ARS", "1283760"],
+      ["FCI COCOS PESOS PLUS CL.A $ (COCOSPPA)", "936530,5", "1402,5", "ARS", "1313484,96"],
+      ["CEDEAR NVIDIA CORPORATION (NVDA)", "132", "12950", "ARS", "1709400"],
+      ["CEDEAR BERKSHIRE HATHAWAY INC. (BRKB)", "48", "36580", "ARS", "1755840"],
+      ["CEDEAR ALPHABET INC. CL  A  (GOOGL)", "216", "9870", "ARS", "2131920"],
+      ["CEDEAR SPDR S&P 500 (SPY)", "186", "19940", "ARS", "3708840"],
+      ["CEDEAR INVESCO QQQ TRUST (QQQ)", "69", "56825", "ARS", "3920925"],
+      ["FCI COCOS DOLARES PLUS CL.A UDS ESC (COCOUSDPA)", "7356,82", "1065,93", "USD", "7841,88"],
+      ["ARS", "2986777,73", "1", "ARS", "2986777,73"],
+      ["EXT", "5,21", "1", "EXT", "5,21"],
+      ["USD", "0,33", "1", "USD", "0,33"]
+    ].map(([instrumento, cantidad, precio, moneda, total]) => ({ instrumento, cantidad, precio, moneda, total }));
+
+    const colors = ["#16735f", "#277a8a", "#a87908", "#385f9f", "#6a5b9c", "#7d8983", "#b14f4b"];
+    const storageKey = "cartera-clara:last-import";
+    const historyKey = "cartera-clara:history";
+    const state = {
+      rows: defaultRows,
+      mep: 1300,
+      search: "",
+      type: "todos",
+      sort: "valueArs",
+      dir: -1,
+      view: "portfolio",
+      page: "home",
+      source: "CSV Cocos - 04/07/2026",
+      importedAt: ""
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+    const number = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 });
+
+    function toNum(value) {
+      if (value === null || value === undefined) return 0;
+      const clean = String(value).trim().replace(/\./g, "").replace(",", ".");
+      const n = Number(clean);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function tickerOf(name) {
+      const match = String(name).match(/\(([A-Z0-9.]+)\)\s*$/);
+      if (match) return match[1];
+      if (name === "ARS" || name === "USD" || name === "EXT") return name;
+      return "";
+    }
+
+    function cleanName(name) {
+      return String(name)
+        .replace(/^CEDEAR\s+(DE\s+)?/i, "")
+        .replace(/\s*\([A-Z0-9.]+\)\s*$/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function typeOf(row) {
+      const name = row.instrumento.toUpperCase();
+      if (name.startsWith("CEDEAR")) return name.includes(" ETF") || name.includes("SPDR") || name.includes("ISHARES") || name.includes("VANGUARD") || name.includes("QQQ") ? "CEDEAR ETF" : "CEDEAR";
+      if (name.startsWith("FCI")) return "FCI";
+      if (name.startsWith("ON ")) return "ON";
+      if (name.startsWith("BONO")) return "Bono";
+      if (name.startsWith("LETRA")) return "Letra";
+      if (name === "ARS" || name === "USD" || name === "EXT" || name.startsWith("DOLAR")) return "Liquidez";
+      return "Accion local";
+    }
+
+    function valueArs(row) {
+      const moneda = String(row.moneda || "").toUpperCase();
+      const total = toNum(row.total);
+      const cantidad = toNum(row.cantidad);
+      const name = String(row.instrumento).toUpperCase();
+      if ((moneda === "USD" || name === "USD" || name.startsWith("DOLAR")) && total === 0) return cantidad * state.mep;
+      if (moneda === "USD") return total * state.mep;
+      return total;
+    }
+
+    function enrichedRows() {
+      const rows = state.rows.map((row) => ({
+        ...row,
+        name: cleanName(row.instrumento),
+        ticker: tickerOf(row.instrumento),
+        type: typeOf(row),
+        valueArs: valueArs(row)
+      })).filter((row) => row.valueArs > 0);
+
+      const total = rows.reduce((sum, row) => sum + row.valueArs, 0);
+      rows.forEach((row) => { row.weight = total ? row.valueArs / total : 0; });
+      return { rows, total };
+    }
+
+    function groupByType(rows) {
+      const map = new Map();
+      rows.forEach((row) => map.set(row.type, (map.get(row.type) || 0) + row.valueArs));
+      return [...map.entries()]
+        .map(([type, value]) => ({ type, value }))
+        .sort((a, b) => b.value - a.value);
+    }
+
+    function renderKpis(rows, total) {
+      const cash = rows.filter((row) => row.type === "Liquidez").reduce((sum, row) => sum + row.valueArs, 0);
+      const cedears = rows.filter((row) => row.type.startsWith("CEDEAR")).reduce((sum, row) => sum + row.valueArs, 0);
+      const top5 = rows.slice().sort((a, b) => b.valueArs - a.valueArs).slice(0, 5).reduce((sum, row) => sum + row.valueArs, 0);
+      const usd = total ? total / state.mep : 0;
+
+      $("totalValue").textContent = money.format(total);
+      $("totalDetail").textContent = "Equiv. USD " + number.format(usd) + " con MEP $" + number.format(state.mep);
+      $("positionsValue").textContent = rows.length;
+      $("positionsDetail").textContent = state.source;
+      $("cedearValue").textContent = total ? number.format((cedears / total) * 100) + "%" : "0%";
+      $("cashValue").textContent = money.format(cash);
+      $("cashDetail").textContent = total ? number.format((cash / total) * 100) + "% del total" : "ARS + USD caja";
+      $("topValue").textContent = total ? number.format((top5 / total) * 100) + "%" : "0%";
+    }
+
+    function formatImportedAt(value) {
+      if (!value) return "Datos de ejemplo incluidos en el tablero.";
+      return "Importado " + new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(new Date(value));
+    }
+
+    function renderImportStatus(rows) {
+      $("importStatus").textContent = state.source;
+      $("importMeta").textContent = `${rows.length} posiciones activas. ${formatImportedAt(state.importedAt)}`;
+    }
+
+    function renderDonut(rows, total) {
+      const groups = groupByType(rows);
+      let cursor = 0;
+      const parts = groups.map((group, index) => {
+        const start = cursor;
+        const pct = total ? (group.value / total) * 100 : 0;
+        cursor += pct;
+        return `${colors[index % colors.length]} ${start}% ${cursor}%`;
+      });
+
+      $("donut").style.setProperty("--donut", `conic-gradient(${parts.join(", ")})`);
+      $("donut").dataset.main = groups[0] && total ? Math.round((groups[0].value / total) * 100) + "%" : "0%";
+      $("legend").innerHTML = groups.slice(0, 6).map((group, index) => `
+        <div class="legend-row">
+          <span class="dot" style="background:${colors[index % colors.length]}"></span>
+          <span>${group.type}</span>
+          <strong>${number.format(total ? (group.value / total) * 100 : 0)}%</strong>
+        </div>
+      `).join("");
+
+      const options = ["<option value=\"todos\">Todos los tipos</option>"]
+        .concat(groups.map((group) => `<option value="${group.type}">${group.type}</option>`));
+      const current = state.type;
+      $("typeFilter").innerHTML = options.join("");
+      $("typeFilter").value = [...groups.map((group) => group.type), "todos"].includes(current) ? current : "todos";
+    }
+
+    function renderInsights(rows, total) {
+      const sorted = rows.slice().sort((a, b) => b.valueArs - a.valueArs);
+      const top2 = sorted.slice(0, 2).reduce((sum, row) => sum + row.valueArs, 0);
+      const cash = rows.filter((row) => row.type === "Liquidez").reduce((sum, row) => sum + row.valueArs, 0);
+      const usdRows = rows.filter((row) => String(row.moneda).toUpperCase() === "USD" || row.instrumento.toUpperCase().includes("DOLAR"));
+      const fixedIncome = rows.filter((row) => ["ON", "Bono", "Letra"].includes(row.type)).reduce((sum, row) => sum + row.valueArs, 0);
+      $("insightMode").textContent = state.view === "risk" ? "riesgo" : "cartera";
+
+      const portfolio = [
+        ["Concentracion", `${sorted[0]?.ticker || sorted[0]?.name || "La posicion mayor"} representa ${number.format((sorted[0]?.weight || 0) * 100)}% del patrimonio estimado.`],
+        ["Top 2", `${sorted.slice(0, 2).map((row) => row.ticker || row.name).join(" + ")} pesan ${number.format(total ? (top2 / total) * 100 : 0)}%.`],
+        ["Liquidez", `${money.format(cash)} disponibles o en saldos. Conviene medirlos contra MEP e inflacion.`],
+        ["USD", `${usdRows.length} posiciones/saldos dependen de la cotizacion MEP cargada.`]
+      ];
+
+      const risk = [
+        ["Moneda", "El total cambia de forma sensible al MEP porque hay activos y saldos en USD."],
+        ["CEDEAR", "La exposicion a empresas globales domina la cartera; falta ver sector y mercado subyacente."],
+        ["Renta fija", `${money.format(fixedIncome)} entre ONs, bonos y letras; el siguiente tablero deberia ordenar por vencimiento.`],
+        ["Datos", "Sin movimientos historicos no se puede distinguir ganancia real de simple valuacion actual."]
+      ];
+
+      const items = state.view === "risk" ? risk : portfolio;
+      $("insights").innerHTML = items.map(([tag, text]) => `
+        <div class="insight"><span class="pill">${tag}</span><span>${text}</span></div>
+      `).join("");
+    }
+
+    function renderFocus(rows, total) {
+      const sorted = rows.slice().sort((a, b) => b.valueArs - a.valueArs);
+      const top5 = sorted.slice(0, 5).reduce((sum, row) => sum + row.valueArs, 0);
+      const cash = rows.filter((row) => row.type === "Liquidez").reduce((sum, row) => sum + row.valueArs, 0);
+      const cedears = rows.filter((row) => row.type.startsWith("CEDEAR")).reduce((sum, row) => sum + row.valueArs, 0);
+      const metrics = [
+        ["Concentracion top 5", total ? top5 / total : 0],
+        ["Exposicion CEDEAR", total ? cedears / total : 0],
+        ["Liquidez", total ? cash / total : 0]
+      ];
+      $("focusList").innerHTML = metrics.map(([label, value]) => `
+        <div class="focus-row">
+          <div class="focus-top"><strong>${label}</strong><span>${number.format(value * 100)}%</span></div>
+          <div class="bar-track"><div class="bar" style="width:${Math.min(value * 100, 100)}%"></div></div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(rows, total) {
+      const query = state.search.toLowerCase().trim();
+      let filtered = rows.filter((row) => {
+        const matchesType = state.type === "todos" || row.type === state.type;
+        const haystack = `${row.name} ${row.ticker} ${row.instrumento}`.toLowerCase();
+        return matchesType && (!query || haystack.includes(query));
+      });
+
+      filtered = filtered.sort((a, b) => {
+        const av = a[state.sort];
+        const bv = b[state.sort];
+        if (typeof av === "number" && typeof bv === "number") return (av - bv) * state.dir;
+        return String(av).localeCompare(String(bv), "es") * state.dir;
+      });
+
+      $("tableCount").textContent = `${filtered.length} filas`;
+      if (!filtered.length) {
+        $("rows").innerHTML = `<tr><td colspan="5"><div class="empty">No hay posiciones para ese filtro.</div></td></tr>`;
+        return;
+      }
+
+      const max = Math.max(...filtered.map((row) => row.valueArs));
+      $("rows").innerHTML = filtered.map((row) => `
+        <tr>
+          <td>
+            <div class="asset">
+              <strong title="${row.instrumento}">${row.name || row.instrumento}</strong>
+              <span class="ticker">${row.ticker || row.moneda} - ${row.moneda || "ARS"}</span>
+            </div>
+          </td>
+          <td><span class="type">${row.type}</span></td>
+          <td class="num">${money.format(row.valueArs)}</td>
+          <td class="num">${number.format(row.weight * 100)}%</td>
+          <td><div class="bar-track"><div class="bar" style="width:${max ? (row.valueArs / max) * 100 : 0}%"></div></div></td>
+        </tr>
+      `).join("");
+    }
+
+    function showPage(page) {
+      state.page = page;
+      $("homePage").classList.toggle("hidden", page !== "home");
+      $("kpiPage").classList.toggle("hidden", page !== "dashboard");
+      $("dashboardPage").classList.toggle("hidden", page !== "dashboard");
+      $("historyPage").classList.toggle("hidden", page !== "history");
+      document.querySelectorAll(".nav-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.page === page);
+      });
+    }
+
+    function readHistory() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(historyKey) || "[]");
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        localStorage.removeItem(historyKey);
+        return [];
+      }
+    }
+
+    function writeHistory(items) {
+      localStorage.setItem(historyKey, JSON.stringify(items.slice(0, 30)));
+    }
+
+    function addHistoryEntry(rows, total) {
+      const entry = {
+        importedAt: state.importedAt,
+        source: state.source,
+        total,
+        positions: rows.length,
+        mep: state.mep
+      };
+      const history = readHistory().filter((item) => item.importedAt !== entry.importedAt);
+      history.unshift(entry);
+      writeHistory(history);
+    }
+
+    function renderHistory(rows, total) {
+      const history = readHistory();
+      $("historyCount").textContent = `${history.length} cargas`;
+      if (!history.length) {
+        $("lastImportValue").textContent = "Sin datos";
+        $("lastImportDetail").textContent = "Carga un CSV desde Importacion.";
+        $("variationValue").textContent = "--";
+        $("historyRows").innerHTML = `<tr><td colspan="5"><div class="empty">Todavia no hay importaciones guardadas.</div></td></tr>`;
+        return;
+      }
+
+      const latest = history[0];
+      const previous = history[1];
+      const variation = previous ? latest.total - previous.total : null;
+      $("lastImportValue").textContent = money.format(latest.total);
+      $("lastImportDetail").textContent = `${latest.source} - ${formatImportedAt(latest.importedAt)}`;
+      $("variationValue").textContent = variation === null ? "--" : `${variation >= 0 ? "+" : ""}${money.format(variation)}`;
+      $("historyRows").innerHTML = history.map((item) => `
+        <tr>
+          <td>${formatImportedAt(item.importedAt).replace("Importado ", "")}</td>
+          <td>${item.source}</td>
+          <td class="num">${money.format(item.total)}</td>
+          <td class="num">${item.positions}</td>
+          <td class="num">$${number.format(item.mep)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function render() {
+      state.mep = Math.max(1, toNum($("mepInput").value) || 1);
+      const { rows, total } = enrichedRows();
+      renderKpis(rows, total);
+      renderImportStatus(rows);
+      renderDonut(rows, total);
+      renderInsights(rows, total);
+      renderFocus(rows, total);
+      renderTable(rows, total);
+      renderHistory(rows, total);
+      $("subtitle").textContent = "Tu portafolio argentino, explicado de verdad.";
+    }
+
+    function savePortfolio() {
+      localStorage.setItem(storageKey, JSON.stringify({
+        rows: state.rows,
+        source: state.source,
+        importedAt: state.importedAt,
+        mep: state.mep
+      }));
+    }
+
+    function loadSavedPortfolio() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+        if (!saved || !Array.isArray(saved.rows) || !saved.rows.length) return;
+        state.rows = saved.rows;
+        state.source = saved.source || "CSV importado";
+        state.importedAt = saved.importedAt || "";
+        state.mep = saved.mep || state.mep;
+        $("mepInput").value = state.mep;
+      } catch (error) {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    function parseCsv(text) {
+      const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return [];
+      const headers = lines[0].split(";").map((header) => header.trim().toLowerCase());
+      return lines.slice(1).map((line) => {
+        const cells = line.split(";");
+        const row = {};
+        headers.forEach((header, index) => { row[header] = cells[index] || ""; });
+        return {
+          instrumento: row.instrumento || "",
+          cantidad: row.cantidad || "0",
+          precio: row.precio || "0",
+          moneda: row.moneda || "ARS",
+          total: row.total || "0"
+        };
+      }).filter((row) => row.instrumento);
+    }
+
+    $("mepInput").addEventListener("input", render);
+    $("mepInput").addEventListener("change", () => {
+      state.mep = Math.max(1, toNum($("mepInput").value) || 1);
+      savePortfolio();
+    });
+    $("searchInput").addEventListener("input", (event) => {
+      state.search = event.target.value;
+      render();
+    });
+    $("typeFilter").addEventListener("change", (event) => {
+      state.type = event.target.value;
+      render();
+    });
+    document.querySelectorAll(".nav-button").forEach((button) => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+    document.querySelectorAll("[data-jump]").forEach((button) => {
+      button.addEventListener("click", () => showPage(button.dataset.jump));
+    });
+    document.querySelectorAll(".segmented button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".segmented button").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        state.view = button.dataset.view;
+        render();
+      });
+    });
+    document.querySelectorAll("th[data-sort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        state.dir = state.sort === key ? state.dir * -1 : -1;
+        state.sort = key;
+        render();
+      });
+    });
+    $("csvInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const parsed = parseCsv(text);
+      if (parsed.length) {
+        state.rows = parsed;
+        state.source = file.name;
+        state.importedAt = new Date().toISOString();
+        state.search = "";
+        state.type = "todos";
+        $("searchInput").value = "";
+        const snapshot = enrichedRows();
+        addHistoryEntry(snapshot.rows, snapshot.total);
+        savePortfolio();
+        render();
+        showPage("dashboard");
+      }
+    });
+    $("resetData").addEventListener("click", () => {
+      state.rows = defaultRows;
+      state.source = "CSV Cocos - 04/07/2026";
+      state.importedAt = "";
+      state.search = "";
+      state.type = "todos";
+      $("searchInput").value = "";
+      localStorage.removeItem(storageKey);
+      render();
+    });
+
+    loadSavedPortfolio();
+    render();
+    showPage(state.page);
+  </script>
+</body>
+</html>
+

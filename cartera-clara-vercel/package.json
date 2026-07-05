@@ -1,0 +1,10 @@
+{
+  "name": "cartera-clara",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "deploy": "vercel",
+    "deploy:prod": "vercel --prod"
+  }
+}
