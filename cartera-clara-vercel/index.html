@@ -643,6 +643,70 @@
       margin-top: 4px;
     }
 
+    .benchmark-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .benchmark-form {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .benchmark-input {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft-2);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .benchmark-input label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .benchmark-input input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 820;
+    }
+
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .benchmark-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 12px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .benchmark-card strong {
+      font-size: 22px;
+    }
+
+    .benchmark-status {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .trend-panel {
       display: grid;
       grid-template-columns: minmax(260px, 1fr) minmax(280px, 0.9fr);
@@ -730,6 +794,8 @@
 
       .workspace,
       .trend-panel,
+      .benchmark-form,
+      .benchmark-grid,
       .hero-product {
         grid-template-columns: 1fr;
       }
@@ -799,6 +865,7 @@
       <button class="nav-button active" data-page="home">Inicio</button>
       <button class="nav-button" data-page="dashboard">Dashboard</button>
       <button class="nav-button" data-page="history">Historial</button>
+      <button class="nav-button" data-page="benchmarks">Benchmarks</button>
     </nav>
 
     <section class="hero-product" id="homePage">
@@ -1007,6 +1074,46 @@
         </table>
       </div>
     </section>
+
+    <section class="panel benchmark-panel hidden" id="benchmarksPage">
+      <div class="panel-head">
+        <h2>Benchmarks</h2>
+        <span class="micro">comparacion del periodo</span>
+      </div>
+      <div class="benchmark-form">
+        <div class="benchmark-input">
+          <label for="benchInflation">Inflacion %</label>
+          <input id="benchInflation" type="number" step="0.1" value="0">
+        </div>
+        <div class="benchmark-input">
+          <label for="benchMep">Dolar MEP %</label>
+          <input id="benchMep" type="number" step="0.1" value="0">
+        </div>
+        <div class="benchmark-input">
+          <label for="benchSpy">S&amp;P 500 %</label>
+          <input id="benchSpy" type="number" step="0.1" value="0">
+        </div>
+        <div class="benchmark-input">
+          <label for="benchMerval">Merval %</label>
+          <input id="benchMerval" type="number" step="0.1" value="0">
+        </div>
+      </div>
+      <div class="benchmark-grid" id="benchmarkCards"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Referencia</th>
+              <th class="num">Benchmark</th>
+              <th class="num">Cartera</th>
+              <th class="num">Diferencia</th>
+              <th>Lectura</th>
+            </tr>
+          </thead>
+          <tbody id="benchmarkRows"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -1051,6 +1158,7 @@
     const colors = ["#16735f", "#277a8a", "#a87908", "#385f9f", "#6a5b9c", "#7d8983", "#b14f4b"];
     const storageKey = "cartera-clara:last-import";
     const historyKey = "cartera-clara:history";
+    const benchmarkKey = "cartera-clara:benchmarks";
     const state = {
       rows: defaultRows,
       mep: 1300,
@@ -1060,6 +1168,7 @@
       dir: -1,
       view: "portfolio",
       page: "home",
+      benchmarks: { inflation: 0, mep: 0, spy: 0, merval: 0 },
       source: "CSV Cocos - 04/07/2026",
       importedAt: ""
     };
@@ -1155,6 +1264,12 @@
         dateStyle: "short",
         timeStyle: "short"
       }).format(new Date(value));
+    }
+
+    function dateKeyFromSource(source, fallback) {
+      const match = String(source || "").match(/(20\d{2})(\d{2})(\d{2})/);
+      if (match) return `${match[1]}-${match[2]}-${match[3]}`;
+      return fallback ? new Date(fallback).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     }
 
     function renderImportStatus(rows) {
@@ -1279,6 +1394,7 @@
       $("kpiPage").classList.toggle("hidden", page !== "dashboard");
       $("dashboardPage").classList.toggle("hidden", page !== "dashboard");
       $("historyPage").classList.toggle("hidden", page !== "history");
+      $("benchmarksPage").classList.toggle("hidden", page !== "benchmarks");
       document.querySelectorAll(".nav-button").forEach((button) => {
         button.classList.toggle("active", button.dataset.page === page);
       });
@@ -1316,13 +1432,14 @@
     function addHistoryEntry(rows, total) {
       const entry = {
         importedAt: state.importedAt,
+        dateKey: dateKeyFromSource(state.source, state.importedAt),
         source: state.source,
         total,
         positions: rows.length,
         mep: state.mep,
         positionsSnapshot: snapshotPositions(rows)
       };
-      const history = readHistory().filter((item) => item.importedAt !== entry.importedAt);
+      const history = readHistory().filter((item) => (item.dateKey || item.importedAt) !== entry.dateKey);
       history.unshift(entry);
       writeHistory(history);
     }
@@ -1445,6 +1562,77 @@
       `).join("");
     }
 
+    function readBenchmarks() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(benchmarkKey) || "null");
+        if (!saved) return state.benchmarks;
+        return {
+          inflation: toNum(saved.inflation),
+          mep: toNum(saved.mep),
+          spy: toNum(saved.spy),
+          merval: toNum(saved.merval)
+        };
+      } catch (error) {
+        localStorage.removeItem(benchmarkKey);
+        return state.benchmarks;
+      }
+    }
+
+    function saveBenchmarks() {
+      localStorage.setItem(benchmarkKey, JSON.stringify(state.benchmarks));
+    }
+
+    function syncBenchmarkInputs() {
+      $("benchInflation").value = state.benchmarks.inflation;
+      $("benchMep").value = state.benchmarks.mep;
+      $("benchSpy").value = state.benchmarks.spy;
+      $("benchMerval").value = state.benchmarks.merval;
+    }
+
+    function portfolioPeriodReturn(history) {
+      if (history.length < 2 || !history[1].total) return null;
+      return ((history[0].total - history[1].total) / history[1].total) * 100;
+    }
+
+    function renderBenchmarks() {
+      const history = readHistory();
+      const portfolioReturn = portfolioPeriodReturn(history);
+      const rows = [
+        ["Inflacion", state.benchmarks.inflation],
+        ["Dolar MEP", state.benchmarks.mep],
+        ["S&P 500", state.benchmarks.spy],
+        ["Merval", state.benchmarks.merval]
+      ];
+
+      $("benchmarkCards").innerHTML = rows.map(([label, value]) => {
+        const diff = portfolioReturn === null ? null : portfolioReturn - value;
+        const ok = diff !== null && diff >= 0;
+        return `
+          <div class="benchmark-card">
+            <div class="label">${label}</div>
+            <strong>${number.format(value)}%</strong>
+            <div class="benchmark-status ${diff === null ? "" : ok ? "positive" : "negative"}">
+              ${diff === null ? "Carga dos CSV para comparar" : `${ok ? "Supera por" : "Pierde por"} ${number.format(Math.abs(diff))} pts`}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      $("benchmarkRows").innerHTML = rows.map(([label, value]) => {
+        const diff = portfolioReturn === null ? null : portfolioReturn - value;
+        const ok = diff !== null && diff >= 0;
+        return `
+          <tr>
+            <td>${label}</td>
+            <td class="num">${number.format(value)}%</td>
+            <td class="num">${portfolioReturn === null ? "--" : `${number.format(portfolioReturn)}%`}</td>
+            <td class="num ${diff === null ? "" : ok ? "positive" : "negative"}">${diff === null ? "--" : `${diff >= 0 ? "+" : ""}${number.format(diff)} pts`}</td>
+            <td>${diff === null ? "Hace falta una carga anterior." : ok ? "La cartera supero esta referencia." : "La cartera quedo debajo de esta referencia."}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
     function render() {
       state.mep = Math.max(1, toNum($("mepInput").value) || 1);
       const { rows, total } = enrichedRows();
@@ -1455,6 +1643,7 @@
       renderFocus(rows, total);
       renderTable(rows, total);
       renderHistory(rows, total);
+      renderBenchmarks();
       $("subtitle").textContent = "Tu portafolio argentino, explicado de verdad.";
     }
 
@@ -1518,6 +1707,18 @@
     document.querySelectorAll("[data-jump]").forEach((button) => {
       button.addEventListener("click", () => showPage(button.dataset.jump));
     });
+    [
+      ["benchInflation", "inflation"],
+      ["benchMep", "mep"],
+      ["benchSpy", "spy"],
+      ["benchMerval", "merval"]
+    ].forEach(([id, key]) => {
+      $(id).addEventListener("input", (event) => {
+        state.benchmarks[key] = toNum(event.target.value);
+        saveBenchmarks();
+        renderBenchmarks();
+      });
+    });
     document.querySelectorAll(".segmented button").forEach((button) => {
       button.addEventListener("click", () => {
         document.querySelectorAll(".segmented button").forEach((item) => item.classList.remove("active"));
@@ -1566,6 +1767,8 @@
     });
 
     loadSavedPortfolio();
+    state.benchmarks = readBenchmarks();
+    syncBenchmarkInputs();
     render();
     showPage(state.page);
   </script>
