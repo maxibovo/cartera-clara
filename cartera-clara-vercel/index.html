@@ -646,8 +646,29 @@
     .benchmark-panel {
       min-height: 0;
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr);
+      grid-template-rows: auto auto auto minmax(0, 1fr);
       gap: 10px;
+    }
+
+    .benchmark-helper {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft-2);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .benchmark-helper strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .benchmark-helper span {
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .benchmark-form {
@@ -681,6 +702,12 @@
       color: var(--ink);
       font-size: 20px;
       font-weight: 820;
+    }
+
+    .source-note {
+      min-height: 15px;
+      color: var(--muted);
+      font-size: 11px;
     }
 
     .benchmark-grid {
@@ -794,6 +821,7 @@
 
       .workspace,
       .trend-panel,
+      .benchmark-helper,
       .benchmark-form,
       .benchmark-grid,
       .hero-product {
@@ -1080,22 +1108,33 @@
         <h2>Benchmarks</h2>
         <span class="micro">comparacion del periodo</span>
       </div>
+      <div class="benchmark-helper">
+        <div>
+          <strong id="benchmarkPeriod">Periodo pendiente</strong>
+          <span id="benchmarkHelp">Carga al menos dos CSV para comparar tu cartera contra referencias del mismo periodo.</span>
+        </div>
+        <button class="primary-button" id="autoBenchmarks" type="button">Actualizar automatico</button>
+      </div>
       <div class="benchmark-form">
         <div class="benchmark-input">
           <label for="benchInflation">Inflacion %</label>
           <input id="benchInflation" type="number" step="0.1" value="0">
+          <div class="source-note" id="sourceInflation">Manual</div>
         </div>
         <div class="benchmark-input">
           <label for="benchMep">Dolar MEP %</label>
           <input id="benchMep" type="number" step="0.1" value="0">
+          <div class="source-note" id="sourceMep">Manual</div>
         </div>
         <div class="benchmark-input">
           <label for="benchSpy">S&amp;P 500 %</label>
           <input id="benchSpy" type="number" step="0.1" value="0">
+          <div class="source-note" id="sourceSpy">Manual</div>
         </div>
         <div class="benchmark-input">
           <label for="benchMerval">Merval %</label>
           <input id="benchMerval" type="number" step="0.1" value="0">
+          <div class="source-note" id="sourceMerval">Manual</div>
         </div>
       </div>
       <div class="benchmark-grid" id="benchmarkCards"></div>
@@ -1169,6 +1208,7 @@
       view: "portfolio",
       page: "home",
       benchmarks: { inflation: 0, mep: 0, spy: 0, merval: 0 },
+      benchmarkSources: { inflation: "Manual", mep: "Manual", spy: "Manual", merval: "Manual" },
       source: "CSV Cocos - 04/07/2026",
       importedAt: ""
     };
@@ -1566,11 +1606,13 @@
       try {
         const saved = JSON.parse(localStorage.getItem(benchmarkKey) || "null");
         if (!saved) return state.benchmarks;
+        const values = saved.values || saved;
+        state.benchmarkSources = saved.sources || state.benchmarkSources;
         return {
-          inflation: toNum(saved.inflation),
-          mep: toNum(saved.mep),
-          spy: toNum(saved.spy),
-          merval: toNum(saved.merval)
+          inflation: toNum(values.inflation),
+          mep: toNum(values.mep),
+          spy: toNum(values.spy),
+          merval: toNum(values.merval)
         };
       } catch (error) {
         localStorage.removeItem(benchmarkKey);
@@ -1579,7 +1621,10 @@
     }
 
     function saveBenchmarks() {
-      localStorage.setItem(benchmarkKey, JSON.stringify(state.benchmarks));
+      localStorage.setItem(benchmarkKey, JSON.stringify({
+        values: state.benchmarks,
+        sources: state.benchmarkSources
+      }));
     }
 
     function syncBenchmarkInputs() {
@@ -1587,6 +1632,10 @@
       $("benchMep").value = state.benchmarks.mep;
       $("benchSpy").value = state.benchmarks.spy;
       $("benchMerval").value = state.benchmarks.merval;
+      $("sourceInflation").textContent = state.benchmarkSources.inflation;
+      $("sourceMep").textContent = state.benchmarkSources.mep;
+      $("sourceSpy").textContent = state.benchmarkSources.spy;
+      $("sourceMerval").textContent = state.benchmarkSources.merval;
     }
 
     function portfolioPeriodReturn(history) {
@@ -1594,9 +1643,114 @@
       return ((history[0].total - history[1].total) / history[1].total) * 100;
     }
 
+    function benchmarkPeriod(history) {
+      if (history.length < 2) return null;
+      return {
+        start: history[1].dateKey || new Date(history[1].importedAt).toISOString().slice(0, 10),
+        end: history[0].dateKey || new Date(history[0].importedAt).toISOString().slice(0, 10)
+      };
+    }
+
+    function nearestByDate(items, date, dateField = "fecha") {
+      const target = new Date(date + "T23:59:59").getTime();
+      return items
+        .filter((item) => item[dateField] && new Date(item[dateField]).getTime() <= target)
+        .sort((a, b) => new Date(b[dateField]) - new Date(a[dateField]))[0];
+    }
+
+    function pctChange(start, end) {
+      const a = Number(start);
+      const b = Number(end);
+      if (!Number.isFinite(a) || !Number.isFinite(b) || a === 0) return null;
+      return ((b - a) / a) * 100;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo leer la fuente");
+      return response.json();
+    }
+
+    async function fetchText(url) {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo leer la fuente");
+      return response.text();
+    }
+
+    async function autoMep(period) {
+      const data = await fetchJson("https://api.argentinadatos.com/v1/cotizaciones/dolares/bolsa");
+      const start = nearestByDate(data, period.start);
+      const end = nearestByDate(data, period.end);
+      const startValue = start ? (Number(start.venta) || Number(start.compra)) : null;
+      const endValue = end ? (Number(end.venta) || Number(end.compra)) : null;
+      return pctChange(startValue, endValue);
+    }
+
+    async function autoInflation(period) {
+      const data = await fetchJson("https://api.argentinadatos.com/v1/finanzas/indices/inflacion");
+      const startTime = new Date(period.start).getTime();
+      const endTime = new Date(period.end + "T23:59:59").getTime();
+      const points = data.filter((item) => {
+        const t = new Date(item.fecha).getTime();
+        return t > startTime && t <= endTime;
+      });
+      if (!points.length) return null;
+      return points.reduce((sum, item) => sum + Number(item.valor || 0), 0);
+    }
+
+    function parseStooqCsv(text) {
+      return text.trim().split(/\r?\n/).slice(1).map((line) => {
+        const [date, open, high, low, close] = line.split(",");
+        return { fecha: date, close: Number(close) };
+      }).filter((item) => item.fecha && Number.isFinite(item.close));
+    }
+
+    async function autoStooq(symbol, period) {
+      const text = await fetchText(`https://stooq.com/q/d/l/?s=${symbol}&i=d`);
+      const data = parseStooqCsv(text);
+      const start = nearestByDate(data, period.start);
+      const end = nearestByDate(data, period.end);
+      return pctChange(start?.close, end?.close);
+    }
+
+    async function runAutoBenchmarks() {
+      const history = readHistory();
+      const period = benchmarkPeriod(history);
+      if (!period) {
+        $("benchmarkHelp").textContent = "Necesitamos dos importaciones para calcular el periodo automaticamente.";
+        return;
+      }
+
+      $("benchmarkHelp").textContent = "Buscando datos publicos. Si una fuente falla, conserva el valor manual.";
+      const tasks = [
+        ["mep", "API ArgentinaDatos", () => autoMep(period)],
+        ["inflation", "API ArgentinaDatos", () => autoInflation(period)],
+        ["spy", "Stooq SPY", () => autoStooq("spy.us", period)],
+        ["merval", "Manual por ahora", async () => null]
+      ];
+
+      for (const [key, label, task] of tasks) {
+        try {
+          const value = await task();
+          if (value === null || !Number.isFinite(value)) throw new Error("Sin dato para el periodo");
+          state.benchmarks[key] = Number(value.toFixed(2));
+          state.benchmarkSources[key] = label;
+        } catch (error) {
+          state.benchmarkSources[key] = key === "merval" ? "Manual: cargar variacion del Merval" : "Manual: fuente no disponible";
+        }
+      }
+      syncBenchmarkInputs();
+      saveBenchmarks();
+      renderBenchmarks();
+    }
+
     function renderBenchmarks() {
       const history = readHistory();
       const portfolioReturn = portfolioPeriodReturn(history);
+      const period = benchmarkPeriod(history);
+      $("benchmarkPeriod").textContent = period ? `Periodo: ${period.start} a ${period.end}` : "Periodo pendiente";
+      $("benchmarkHelp").textContent = period ? "Carga valores manuales o usa actualizacion automatica. La cartera se compara contra la variacion entre las ultimas dos importaciones." : "Carga al menos dos CSV para comparar tu cartera contra referencias del mismo periodo.";
+      syncBenchmarkInputs();
       const rows = [
         ["Inflacion", state.benchmarks.inflation],
         ["Dolar MEP", state.benchmarks.mep],
@@ -1715,10 +1869,12 @@
     ].forEach(([id, key]) => {
       $(id).addEventListener("input", (event) => {
         state.benchmarks[key] = toNum(event.target.value);
+        state.benchmarkSources[key] = "Manual";
         saveBenchmarks();
         renderBenchmarks();
       });
     });
+    $("autoBenchmarks").addEventListener("click", runAutoBenchmarks);
     document.querySelectorAll(".segmented button").forEach((button) => {
       button.addEventListener("click", () => {
         document.querySelectorAll(".segmented button").forEach((item) => item.classList.remove("active"));

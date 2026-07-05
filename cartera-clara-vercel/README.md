@@ -13,6 +13,7 @@ Tablero web para cargar una exportacion CSV de Cocos Capital y analizar la compo
 - Grafico de evolucion del patrimonio.
 - Deteccion de cambios por instrumento entre la ultima carga y la anterior.
 - Seccion Benchmarks con comparacion manual contra inflacion, dolar MEP, S&P 500 y Merval.
+- Boton de actualizacion automatica para intentar completar MEP, inflacion y S&P 500 con fuentes publicas.
 - Reemplazo automatico de importaciones del mismo dia/archivo para evitar duplicados.
 
 ## Uso diario
@@ -24,9 +25,11 @@ Tablero web para cargar una exportacion CSV de Cocos Capital y analizar la compo
 5. Revisar patrimonio, composicion, liquidez, concentracion y posiciones.
 6. Entrar a `Historial` para comparar contra cargas anteriores.
 7. Entrar a `Benchmarks` y cargar las variaciones del periodo para comparar rendimiento relativo.
+8. Usar `Actualizar automatico` como primer intento y ajustar manualmente cualquier dato faltante.
 
 La ultima importacion queda guardada localmente en el navegador de ese dispositivo.
 Las comparaciones por instrumento se calculan a partir de importaciones realizadas con esta version o posteriores.
+Las fuentes automaticas pueden fallar o no tener datos para el periodo; en ese caso el campo queda editable de forma manual.
 
 ## Publicar en Vercel
 
